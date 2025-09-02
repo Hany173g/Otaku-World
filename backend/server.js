@@ -62,8 +62,15 @@ const PORT = process.env.PORT;
 
 //Routes
 let signupRoute = require('./routes/authRoute')
+let profileRoute = require('./routes/profileRoute')
+let homeRoute = require('./routes/homeRoute')
+let dashboardRoute = require('./routes/dashboardRoute')
 
 app.use('/api/auth', signupRoute)
+app.use('/api/dashboard',dashboardRoute)
+app.use('/profile',profileRoute)
+app.use('/home',homeRoute)
+
 
 app.listen(PORT, () => {
     console.log("Server Is Start")

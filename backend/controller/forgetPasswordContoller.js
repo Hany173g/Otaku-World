@@ -9,16 +9,16 @@ const { Op } = require("sequelize");
 
 
 
-cron.schedule('* * * * *', async () => {
-    // كل دقيقة
-    const now = Date.now();
-    await expiredCode.destroy({
-        where: {
-            expiredTime: {   [Op.lt]: Date.now() }
-        }
-    });
-    console.log('Success Delete Codes end expires');
-});
+// cron.schedule('* * * * *', async () => {
+//     // كل دقيقة
+//     const now = Date.now();
+//     await expiredCode.destroy({
+//         where: {
+//             expiredTime: {   [Op.lt]: Date.now() }
+//         }
+//     });
+//     console.log('Success Delete Codes end expires');
+// });
 
 
 
