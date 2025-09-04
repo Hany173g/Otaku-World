@@ -100,7 +100,6 @@ exports.createNewUser = async(req,res) => {
 exports.login = async(req,res) => {
     try{
         let {email,password} = req.body;
-        console.log(req.body)
         if (checkDataLogin(password,email,res)) return;
         if (validationEmail(email,res)) return;
         if (validationPassword(password,res)) return;

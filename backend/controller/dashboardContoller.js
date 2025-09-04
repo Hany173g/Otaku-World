@@ -1,12 +1,13 @@
-const { episode, server,session } = require('../models/relations');
+const { episode, server,session,complaint,User } = require('../models/relations');
 
 
 
-function checkDataSession(description,sessionName,countEpisode,Trillar,categories,res){
+function checkDataSession(description,sessionName,countEpisode,Trillar,categories){
     if (!description||!sessionName||!countEpisode||!Trillar||!categories)
     {
-        return res.status(400).json({msg:"البينات ليست كامله"})
+         return true;
     }
+    return false;
 }
 
 
@@ -30,12 +31,18 @@ exports.addNewSession  = async(req,res) => {
         {
             return res.status(400).json({msg:"لأ يمكن ان يكون الحلقات اصغر من صفر"})
         }
-        checkData(description,sessionName,countEpisode,Trillar,categories,res);
+        if (checkDataSession(description,sessionName,countEpisode,Trillar,categories))
+        {
+            return res.status(400).json({msg:"البينات غير كامله"})
+        }
         let newServer = await session.create({description,countEpisode,sessionName,Trillar,categories});
         res.status(200).json({msg:"Session is created",newServer})
     }catch(err)
     {
+        if (!res.headersSent)
+        {
         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+        }
     }
 }
 
@@ -43,6 +50,7 @@ exports.addNewSession  = async(req,res) => {
 exports.addNewEpisode = async(req,res) => {
     try{
         let {sessionName,numberEpisode,Image,serverName,videoUrl}  = req.body;
+  
         checkDataEpisode(sessionName,numberEpisode,Image,serverName,videoUrl,res)
         let findSession = await session.findOne({where:{sessionName}})
 
@@ -68,10 +76,11 @@ exports.addNewEpisode = async(req,res) => {
                    return res.status(400).json({msg:"رقم الحلقه هذا مضاف بلفغل"})
                 }
         }
-        console.log("create episode")
+    
         let Data =  await findSession.createEpisode({numberEpisode, Image})
         const lastEpisode = Data;
          await lastEpisode.createServer({videoUrl,serverName})
+     
         res.status(200).json({msg:"تم اضافه الحلقه بنجاح"})
     }catch(err)
     {
@@ -84,7 +93,10 @@ exports.addNewEpisode = async(req,res) => {
 exports.getAllEpisodesFromSession = async(req,res) => {
     try{
         let {sessionName} = req.body;
-
+        if (!sessionName)
+        {
+            return res.status(400).json({msg:"البينات ليس كامله"})
+        }
         let findSession = await session.findOne({where:{sessionName}})
 
         if (!findSession)
@@ -93,11 +105,34 @@ exports.getAllEpisodesFromSession = async(req,res) => {
         }
         let sessionWithEpisodes = await session.findOne({where:{id:findSession.id},
         include:[
-            {model:episode}
+            {model:episode,
+                include:[
+                    {model:server}
+                ]
+            }
         ]})
+     
         res.status(200).json({data: sessionWithEpisodes})
     }catch(err)
     {
          res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+
+
+
+
+
+exports.getAllComplaints = async(req,res) => {
+    try{
+        let complaints = await complaint.findAll({include:[
+            {model:episode},
+            {model:User}
+        ]});
+        res.status(200).json({complaints})
+    }catch(err)
+    {
+       res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
     }
 }

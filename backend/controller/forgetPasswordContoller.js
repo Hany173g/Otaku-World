@@ -9,16 +9,15 @@ const { Op } = require("sequelize");
 
 
 
-// cron.schedule('* * * * *', async () => {
-//     // كل دقيقة
-//     const now = Date.now();
-//     await expiredCode.destroy({
-//         where: {
-//             expiredTime: {   [Op.lt]: Date.now() }
-//         }
-//     });
-//     console.log('Success Delete Codes end expires');
-// });
+cron.schedule('* * * * *', async () => {
+    // كل دقيقة
+    const now = Date.now();
+    await expiredCode.destroy({
+        where: {
+            expiredTime: {   [Op.lt]: Date.now() }
+        }
+    });
+});
 
 
 
@@ -107,12 +106,12 @@ exports.resetPassword = async(req,res) => {
         res.status(201).json({msg:"تم تحديث الرمز الخاص بك"})
     }catch(err)
     {
-        console.log(err)
+      
         res.status(400).json({msg:"فشل تحديث الباسورد",error:err.message})
     }
 }
 
-
+// check expired code bigger than 1 hour
 exports.checkCode = async(req,res) => {
     try{
         let code = req.params.id;

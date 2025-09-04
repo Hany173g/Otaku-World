@@ -65,13 +65,16 @@ let signupRoute = require('./routes/authRoute')
 let profileRoute = require('./routes/profileRoute')
 let homeRoute = require('./routes/homeRoute')
 let dashboardRoute = require('./routes/dashboardRoute')
+let episodeRoute = require('./routes/episodeRoute')
+let sessionRoute = require('./routes/sessionRoute')
+
 
 app.use('/api/auth', signupRoute)
 app.use('/api/dashboard',dashboardRoute)
 app.use('/profile',profileRoute)
 app.use('/home',homeRoute)
-
-
+app.use('/api/episode',episodeRoute)
+app.use('/api',sessionRoute)
 app.listen(PORT, () => {
     console.log("Server Is Start")
     console.log(`Swagger Documentation: http://localhost:${PORT}/api-docs`)

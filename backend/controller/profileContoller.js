@@ -15,7 +15,7 @@ exports.getProfile = async(req,res) => {
         let isUser = null;
         let userData = null;
         let isOwnerProfile;
-        console.log(req.user)
+      
         if (req.user)
         {
             isUser = true;

@@ -8,7 +8,7 @@ const isAuth = require('./projectRoutes/isAuth');
 
 
 
-route.post('/newAnime',isAuth,dashboardContoller.addNewSession);
+route.post('/newAnime',dashboardContoller.addNewSession);
 
 route.post('/newEpisode',isAuth,dashboardContoller.addNewEpisode)
 
@@ -16,7 +16,7 @@ route.post('/newEpisode',isAuth,dashboardContoller.addNewEpisode)
 route.post('/getAllEpisode',isAuth,dashboardContoller.getAllEpisodesFromSession)
 
 
-
+route.get('/getAllComplaints',isAuth,dashboardContoller.getAllComplaints)
 
 module.exports = route;
 
