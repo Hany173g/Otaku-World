@@ -12,6 +12,7 @@ const homeContoller = require('../controller/homeContoller')
 
 
 route.get('/',isAuth,isAuth,homeContoller.getHome)
+route.get('/search',isAuth,homeContoller.searchAnime)
 
 
 

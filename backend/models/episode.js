@@ -18,7 +18,7 @@ const episode = sequelize.define('episode', {
         allowNull: false
     },
     Image:{
-        type:DataTypes.STRING,
+        type:DataTypes.TEXT,
         allowNull:false
     },
     sessionId: {

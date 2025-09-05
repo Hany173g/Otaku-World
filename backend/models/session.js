@@ -3,7 +3,7 @@ const {DataTypes} = require('sequelize');
 
 const sequelize = require('../config/database');
 
-//   sequelize.sync({ alter: true });
+  sequelize.sync({ alter: true });
 
 
 
@@ -34,6 +34,10 @@ let session = sequelize.define('session',{
         type:DataTypes.JSON,
         allowNull: false
     },
+    Image: {
+        type:DataTypes.STRING,
+        allowNull: false
+    }
 
     },{
         tableName:'sessions',

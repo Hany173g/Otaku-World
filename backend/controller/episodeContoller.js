@@ -37,7 +37,7 @@ exports.addComment = async(req,res) => {
         }
          
         let newComment = await post.createComment({content,userId});
-        res.status(200).json({msg:"تم اضافه الكومن بنجاح",newComment})
+        res.status(200).json({msg:"تم اضافه الكومنت بنجاح",newComment})
     }catch(err)
     {
         res.status(400).json({msg:"حدث خطاء حاول مره اخره",error:err.message})
@@ -84,6 +84,7 @@ exports.addComplaints = async(req,res) => {
             return res.status(400).json({msg:"هذا المستخدم غير موجود"});
         }
         let newComplaint = await episodeData.createComplaint({content,userId})
+        console.log(newComplaint.dataValues)
         res.status(200).json({msg:"تم ارسال المشكله لي فريق الدعم,شكرا لك",newComplaint})
     }catch(err)
     {

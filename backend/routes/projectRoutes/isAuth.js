@@ -13,7 +13,7 @@ module.exports = (req,res,next) => {
         
         if (!authHeader)
         {
-            req.user = null;
+        req.user = null;
             
            return next();
         }
@@ -21,10 +21,10 @@ module.exports = (req,res,next) => {
         let token = authHeader;
         let decode = jwt.verify(token,process.env.JWT_SECERT)
         req.user = decode;
-     
         next();
     }catch(err)
     {
+        console.log(err.message)
         req.user = null;
         next();
     }

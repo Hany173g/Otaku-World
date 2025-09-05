@@ -82,7 +82,7 @@ const sendMail = (user,resetLink) => {
             <div class="container">
                 <h2>إعادة تعيين كلمة المرور</h2>
                 <p>لقد طلبت إعادة تعيين كلمة المرور في موقعنا. اضغط على الزر أدناه لتعيين كلمة مرور جديدة:</p>
-                <a href="http://127.0.0.1:5500/reset-password.html/${resetLink}" class="btn">تغير  كلمة المرور</a>
+                <a href="http://localhost:3001/forget-password/${resetLink}" class="btn">إعادة تعيين كلمة المرور</a>
                 <p class="alert">هذا الرابط صالح لمده ساعه فقط</p>
                 <p>إذا لم تطلب هذا، يمكنك تجاهل هذا الإيميل بأمان.</p>
                 <div class="footer">

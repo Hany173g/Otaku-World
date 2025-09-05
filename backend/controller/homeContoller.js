@@ -64,11 +64,60 @@ exports.getHome = async(req,res) => {
                 }
                 y = 0;
             }
-        
+        console.log(animesData)
         res.status(200).json({isUser,animesData})
     }catch(err)
     {
         res.status(400).json({msg:`حدث مشكله ${err.message}`})}
+}
+
+// دالة البحث
+exports.searchAnime = async(req,res) => {
+    try {
+        const { q } = req.query;
+        
+        if (!q || q.trim().length < 2) {
+            return res.status(400).json({msg: "يرجى إدخال كلمة بحث من حرفين على الأقل"});
+        }
+
+        const { Op } = require('sequelize');
+        const { session } = require('../models/relations');
+
+        // البحث في اسم الأنمي والوصف والتصنيفات
+        const searchResults = await session.findAll({
+            where: {
+                [Op.or]: [
+                    {
+                        sessionName: {
+                            [Op.like]: `%${q}%`
+                        }
+                    },
+                    {
+                        description: {
+                            [Op.like]: `%${q}%`
+                        }
+                    },
+                    {
+                        categories: {
+                            [Op.contains]: [q]
+                        }
+                    }
+                ]
+            },
+            limit: 20,
+            order: [['sessionName', 'ASC']]
+        });
+
+        res.status(200).json({
+            results: searchResults,
+            query: q,
+            count: searchResults.length
+        });
+
+    } catch (err) {
+        console.error("Search error:", err);
+        res.status(400).json({msg: `حدث خطأ في البحث: ${err.message}`});
+    }
 }
 
 

@@ -26,24 +26,6 @@ function checkDataLogin(password,email,res){
 }
 
 
-//check length password >= 8 < 16
-function validationPassword(password,res) {
-    if(password.length < 8 || password.length > 15){
-        res.status(400).json({msg:"Password يجب ان  يكون من 8 إلى 15 حرف"});
-        return true;
-    }
-    return false;
-}
-
-function validationUsername(username,res) {
-    if (username.length < 5 || username.length > 20){
-        res.status(400).json({msg:"يجب ان يكون الأسم من 5 حروف الى 20 حرف"});
-        return true;
-    }
-    
-    return false;
-}
-
 function validationEmail(email,res,findEmail){
       if (!validator.isEmail(email))
         {
@@ -69,9 +51,9 @@ exports.createNewUser = async(req,res) => {
             where: {email: email}
         })
         if (checkData(username,password,email,res)) return;
-        if (validationUsername(username,res)) return;
+      
         if (validationEmail(email,res,findEmail)) return;
-        if (validationPassword(password,res)) return;
+  
                 
                 // hashing password
         let hashPassword = await bcrypt.hash(password,10);
@@ -100,9 +82,9 @@ exports.createNewUser = async(req,res) => {
 exports.login = async(req,res) => {
     try{
         let {email,password} = req.body;
-        if (checkDataLogin(password,email,res)) return;
+      
         if (validationEmail(email,res)) return;
-        if (validationPassword(password,res)) return;
+    
         let user = await User.findOne({where:{email:email}});
         if (!user)
         {
@@ -113,7 +95,7 @@ exports.login = async(req,res) => {
         {
             return res.status(400).json({msg:"الرقم السري غير صحيح"})
         }
-        const token = jwt.sign({ id: user.id, username: user.username },process.env.JWT_SECERT,{ expiresIn: '1d' });
+        const token = jwt.sign({ id: user.id, username: user.username ,role:user.role},process.env.JWT_SECERT,{ expiresIn: '1d' });
         res.status(200).json({msg:"تم تسجيل الدخول بنجاح",token})
     }catch(err)
     {

@@ -28,6 +28,11 @@ const User = sequelize.define('User',{
         type:DataTypes.STRING,
         allowNull:false,
         defaultValue:"user"
+    },
+    image:{
+        type:DataTypes.STRING,
+        allowNull:false,
+        defaultValue:'default',
     }
 },{
     tableName:'Users',

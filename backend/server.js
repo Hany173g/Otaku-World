@@ -3,13 +3,21 @@ const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config()
-
+const path = require('path')
 const app = express();
 
 //Server Settings
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+
+
+// paths
+
+
+app.use(express.static(path.join(__dirname,'uploads')))
+
 
 // Swagger Configuration
 const swaggerOptions = {

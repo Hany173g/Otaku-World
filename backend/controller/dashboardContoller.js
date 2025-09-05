@@ -1,4 +1,38 @@
+
 const { episode, server,session,complaint,User } = require('../models/relations');
+
+
+
+
+
+const bcrypt = require('bcrypt')
+
+
+
+
+
+
+
+exports.getDashboard = async(req,res)=>{
+    try{
+        let isAdmin = false;
+        let isUser = false;
+        if (req.user.role === 'admin')
+        {
+            
+            isAdmin = true;
+        }
+        if (req.user)
+        {
+            isUser = true;
+        }
+        res.status(200).json({isAdmin,isUser})
+    }catch(err)
+    {
+        res.status(400).json({msg:"حدث خطاء ما حاول مره اخره",error:err.message})
+    }
+}
+
 
 
 
@@ -21,6 +55,8 @@ function checkDataEpisode(sessionName,numberEpisode,Image,videoUrl,serverName,re
 
 exports.addNewSession  = async(req,res) => {
     try{
+        if (req.user.role === 'admin')
+        {
         const {description,sessionName,countEpisode,Trillar,categories} = req.body;
         let findSession = await session.findOne({where:{sessionName}})
         if (findSession)
@@ -37,6 +73,11 @@ exports.addNewSession  = async(req,res) => {
         }
         let newServer = await session.create({description,countEpisode,sessionName,Trillar,categories});
         res.status(200).json({msg:"Session is created",newServer})
+    }
+    else
+    {
+        res.status(400).json({msg:"انت لست لديك الصلأحيات"})
+    }
     }catch(err)
     {
         if (!res.headersSent)
@@ -49,6 +90,8 @@ exports.addNewSession  = async(req,res) => {
 
 exports.addNewEpisode = async(req,res) => {
     try{
+        if (req.user.role === 'admin')
+        {
         let {sessionName,numberEpisode,Image,serverName,videoUrl}  = req.body;
   
         checkDataEpisode(sessionName,numberEpisode,Image,serverName,videoUrl,res)
@@ -82,6 +125,9 @@ exports.addNewEpisode = async(req,res) => {
          await lastEpisode.createServer({videoUrl,serverName})
      
         res.status(200).json({msg:"تم اضافه الحلقه بنجاح"})
+    }else {
+        res.status(400).json({msg:"انت لست لديك الصلأحيات"})
+    }
     }catch(err)
     {
          res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
@@ -92,6 +138,8 @@ exports.addNewEpisode = async(req,res) => {
 
 exports.getAllEpisodesFromSession = async(req,res) => {
     try{
+        if (req.user.role === 'admin')
+        {
         let {sessionName} = req.body;
         if (!sessionName)
         {
@@ -113,6 +161,11 @@ exports.getAllEpisodesFromSession = async(req,res) => {
         ]})
      
         res.status(200).json({data: sessionWithEpisodes})
+    }
+    else
+    {
+        res.status(400).json({msg:"انت لست لديك الصلأحيات"})
+    }
     }catch(err)
     {
          res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
@@ -126,13 +179,144 @@ exports.getAllEpisodesFromSession = async(req,res) => {
 
 exports.getAllComplaints = async(req,res) => {
     try{
+    if(req.user.role === 'admin')
+    {
         let complaints = await complaint.findAll({include:[
-            {model:episode},
-            {model:User}
+            {model:episode,attributes:['numberEpisode']},
+            {model:User,attributes:['username','id']}
         ]});
+        console.log(complaint)
         res.status(200).json({complaints})
+    }else {
+        res.status(400).json({msg:"انت لست لديك الصلأحيات"})
+    }
     }catch(err)
     {
        res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+
+
+
+
+// User
+
+
+
+
+
+
+
+exports.getAllUser  = async(req,res)=>
+{
+    try {
+  
+        if(req.user.role === 'admin')
+        {
+        let users = await User.findAll({})
+        res.status(200).json({userData:users})
+        }else
+        {
+            res.status(400).json({msg:"ليس لديك الصلأحيات لغعل هذا"})
+        }
+    }catch(err)
+    {
+         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+
+exports.deleteUser = async(req,res) => {
+    try{
+        const {id} = req.params;
+        const user = await User.findOne({where:{id}});
+        if (!user)
+        {
+            return res.status(400).json({msg:"هذا المستخدم غير موجود"})
+        }
+        await user.destroy();
+        res.status(200).json({msg:"تم حذف الحساب بنجاح"})
+    }catch(err)
+    {
+        res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+
+exports.editUser = async(req,res) => {
+    try{
+    if (req.user.role === 'admin')
+    {
+        let {role,username,password,email} = req.body;
+   
+        
+        const checkEmail = await User.findOne({where:{email}});
+        if (checkEmail){
+            return res.status(400).json({msg:"هذا الجميل مستخدم من قبل"})
+        }
+        const{id} = req.params;
+        const user = await User.findOne({where:{id}});
+        if (!user)
+        {
+            return res.status(400).json({msg:"هذا المستخدم غير موجود"})
+        }
+        let hashPassword;
+         if (!role) {
+            role = user.role;
+        };
+        if (!username){
+        username = user.username;
+        }
+         if (!email)
+            {
+                email = user.email
+            }
+        if (!password){
+        password = user.password;
+        }
+        else {
+            hashPassword = await bcrypt.hash(password,10);
+            password = hashPassword;
+        }
+        
+
+        await user.update({role,username,password})
+        res.status(201).json({msg:"تم تحديث بينات المستخدم بنجاح"});
+    }
+    else {
+     res.status(400).json({msg:"ليس لديك الصلأحيات لغعل هذا"})
+    }
+    }catch(err){
+        res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+
+exports.searchUser = async(req,res) => {
+    try {
+        if (req.user.role === 'admin')
+        {
+            let {username} = req.body;
+            let users = await User.findAll({where:{username},limit:10});
+            if (users.length === 0)
+            {
+                return res.status(400).json({msg:"لأ يوجد نتائج على هذا البحث"})
+            }
+            return res.status(200).json({usersData:users})
+        } 
+    }catch(err)
+    {
+         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+exports.getAllSessions = async(req,res)=>{
+    try{
+        let sessions = await session.findAll();
+        return res.status(200).json({data:sessions})
+    }catch(err)
+    {
+         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
     }
 }
