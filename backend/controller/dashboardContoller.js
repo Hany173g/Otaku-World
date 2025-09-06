@@ -36,8 +36,8 @@ exports.getDashboard = async(req,res)=>{
 
 
 
-function checkDataSession(description,sessionName,countEpisode,Trillar,categories){
-    if (!description||!sessionName||!countEpisode||!Trillar||!categories)
+function checkDataSession(description,sessionName,countEpisode,Trillar,categories,Image){
+    if (!description||!sessionName||!countEpisode||!Trillar||!categories||!Image)
     {
          return true;
     }
@@ -57,7 +57,7 @@ exports.addNewSession  = async(req,res) => {
     try{
         if (req.user.role === 'admin')
         {
-        const {description,sessionName,countEpisode,Trillar,categories} = req.body;
+        const {description,sessionName,countEpisode,Trillar,categories,Image} = req.body;
         let findSession = await session.findOne({where:{sessionName}})
         if (findSession)
         {
@@ -67,11 +67,11 @@ exports.addNewSession  = async(req,res) => {
         {
             return res.status(400).json({msg:"لأ يمكن ان يكون الحلقات اصغر من صفر"})
         }
-        if (checkDataSession(description,sessionName,countEpisode,Trillar,categories))
+        if (checkDataSession(description,sessionName,countEpisode,Trillar,categories,Image))
         {
             return res.status(400).json({msg:"البينات غير كامله"})
         }
-        let newServer = await session.create({description,countEpisode,sessionName,Trillar,categories});
+        let newServer = await session.create({description,countEpisode,sessionName,Trillar,categories,Image});
         res.status(200).json({msg:"Session is created",newServer})
     }
     else
@@ -80,19 +80,18 @@ exports.addNewSession  = async(req,res) => {
     }
     }catch(err)
     {
-        if (!res.headersSent)
-        {
+        console.log(err.message)
         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
-        }
+        
     }
 }
 
 
 exports.addNewEpisode = async(req,res) => {
     try{
+        
         if (req.user.role === 'admin')
         {
-        let {sessionName,numberEpisode,Image,serverName,videoUrl}  = req.body;
   
         checkDataEpisode(sessionName,numberEpisode,Image,serverName,videoUrl,res)
         let findSession = await session.findOne({where:{sessionName}})
@@ -175,6 +174,21 @@ exports.getAllEpisodesFromSession = async(req,res) => {
 
 
 
+exports.getAllSessions = async(req,res) => {
+    try{
+        if (req.user.role === 'admin')
+        {
+            let allSessions = await session.findAll({});
+            res.status(200).json({allSessions})
+        }else {
+             res.status(400).json({msg:"انت لست لديك الصلأحيات"})
+        }
+    }catch(err)
+    {
+        res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+} 
+
 
 
 exports.getAllComplaints = async(req,res) => {
@@ -214,7 +228,7 @@ exports.getAllUser  = async(req,res)=>
   
         if(req.user.role === 'admin')
         {
-        let users = await User.findAll({})
+        let users = await User.findAll({limit:20})
         res.status(200).json({userData:users})
         }else
         {
@@ -305,16 +319,6 @@ exports.searchUser = async(req,res) => {
             }
             return res.status(200).json({usersData:users})
         } 
-    }catch(err)
-    {
-         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
-    }
-}
-
-exports.getAllSessions = async(req,res)=>{
-    try{
-        let sessions = await session.findAll();
-        return res.status(200).json({data:sessions})
     }catch(err)
     {
          res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
