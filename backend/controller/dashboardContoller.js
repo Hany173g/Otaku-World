@@ -37,7 +37,7 @@ exports.getDashboard = async(req,res)=>{
 
 
 function checkDataSession(description,sessionName,countEpisode,Trillar,categories,Image){
-    if (!description||!sessionName||!countEpisode||!Trillar||!categories||!Image)
+    if (!description||!sessionName||!countEpisode||!Trillar||!Image || !categories || categories.length === 0)
     {
          return true;
     }
@@ -92,7 +92,7 @@ exports.addNewEpisode = async(req,res) => {
         
         if (req.user.role === 'admin')
         {
-  
+            let {sessionName, numberEpisode, Image, videoUrl, serverName} = req.body;
         checkDataEpisode(sessionName,numberEpisode,Image,serverName,videoUrl,res)
         let findSession = await session.findOne({where:{sessionName}})
 
@@ -243,7 +243,7 @@ exports.getAllUser  = async(req,res)=>
 
 exports.deleteUser = async(req,res) => {
     try{
-        const {id} = req.params;
+        const {id} = req.body;
         const user = await User.findOne({where:{id}});
         if (!user)
         {
@@ -258,19 +258,16 @@ exports.deleteUser = async(req,res) => {
 }
 
 
+
+
+
 exports.editUser = async(req,res) => {
     try{
     if (req.user.role === 'admin')
     {
         let {role,username,password,email} = req.body;
-   
-        
-        const checkEmail = await User.findOne({where:{email}});
-        if (checkEmail){
-            return res.status(400).json({msg:"هذا الجميل مستخدم من قبل"})
-        }
-        const{id} = req.params;
-        const user = await User.findOne({where:{id}});
+        let{id} = req.params;
+        let user = await User.findOne({where:{id}});
         if (!user)
         {
             return res.status(400).json({msg:"هذا المستخدم غير موجود"})

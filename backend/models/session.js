@@ -3,7 +3,7 @@ const {DataTypes} = require('sequelize');
 
 const sequelize = require('../config/database');
 
-  sequelize.sync({ alter: true });
+//   sequelize.sync({ alter: true });
 
 
 
@@ -20,7 +20,7 @@ let session = sequelize.define('session',{
         unique:true
     },
     description: {
-        type:DataTypes.STRING,
+        type:DataTypes.STRING(1000),
         allowNull: false,
     },
     countEpisode: {
@@ -35,7 +35,7 @@ let session = sequelize.define('session',{
         allowNull: false
     },
     Image: {
-        type:DataTypes.STRING,
+        type:DataTypes.TEXT,
         allowNull: false
     }
 

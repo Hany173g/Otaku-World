@@ -12,7 +12,7 @@ const episodeContoller = require('../controller/episodeContoller')
 route.post('/addcomment',isAuth,episodeContoller.addComment)
 
 
-
+route.get('/allepisodes',isAuth,episodeContoller.getAllEpisode)
 route.get('/:episodeId',isAuth,episodeContoller.getEpisode)
 
 

@@ -5,8 +5,6 @@ const {episode} = require('./episode');
 const {server} = require('./servers')
 const {comment} = require('./comment')
 const {complaint} = require('./complaints')
-const{Algorithm} = require('./algorithm')
-const {algorithmHistory}  = require('./algorithmHistory')
 
 
 // relation user to expired code 
@@ -57,19 +55,5 @@ complaint.belongsTo(User,{foreignKey:'userId'});
 
 
 
-// relation algorithm sort to user
 
-User.hasOne(Algorithm,{foreignKey:'userId',onDelete:'CASCADE'});
-Algorithm.belongsTo(User,{foreignKey:'userId'});
-
-
-
-// relation user to algorithm history
-
-
-User.hasMany(algorithmHistory,{foreignKey:'userId',onDelete:'CASCADE'});
-algorithmHistory.belongsTo(User,{foreignKey:'userId'});
-
-
-
-module.exports = { User, expiredCode,episode,server,session ,comment,complaint,Algorithm,algorithmHistory};
+module.exports = { User, expiredCode,episode,server,session ,comment,complaint};

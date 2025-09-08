@@ -1,5 +1,5 @@
 
-const { episode, comment,User ,complaint} = require('../models/relations');
+const { episode, comment,User ,complaint, server} = require('../models/relations');
 
 
 
@@ -22,6 +22,11 @@ function checkDataComment(content,userId,postId,res,req)
 // add comment to episode and realtion to user and episode
 exports.addComment = async(req,res) => {
     try{
+        let isUser = null;
+        if (req.user)
+        {
+            isUser = null;
+        }
         const{content,userId,postId} = req.body;
         checkDataComment(content,userId,postId,res,req)
 
@@ -37,7 +42,7 @@ exports.addComment = async(req,res) => {
         }
          
         let newComment = await post.createComment({content,userId});
-        res.status(200).json({msg:"تم اضافه الكومنت بنجاح",newComment})
+        res.status(200).json({msg:"تم اضافه الكومنت بنجاح",newComment,checkUser,isUser})
     }catch(err)
     {
         res.status(400).json({msg:"حدث خطاء حاول مره اخره",error:err.message})
@@ -48,21 +53,39 @@ exports.addComment = async(req,res) => {
 
 
 
+
+
+exports.getAllEpisode = async(req,res) => {
+    try{
+        let isUser= null;
+        if (req.user)
+        {
+            isUser = req.user;
+        }
+        let allEpisodes = await episode.findAll({});
+        res.status(200).json({allEpisodes,isUser})
+    }catch(err)
+    {
+        res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
+    }
+}
+
+
 exports.getEpisode = async(req,res) => {
     try{
         const {episodeId} = req.params;
+        let isUser = null;
         if (!episodeId)
         {
+            isUser = null;
             return res.status(400).json({msg:"البينات ليست كامله"})
         }
-        else if(!req.user)
-        {
-            return res.status(400).json({msg:"يجيب تسجيل الدخول"})
-        }
         let episodeData =  await episode.findOne({where:{id:episodeId},include:[
-            {model:comment}
+            {model:comment, include: [{model: User}],order: [['createdAt', 'DESC']]},
+            {model: server}
         ]});
-        res.status(200).json({episodeData})
+        
+        res.status(200).json({episodeData,isUser})
     }catch(err)
     {
           res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})

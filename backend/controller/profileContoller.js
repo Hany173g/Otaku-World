@@ -19,7 +19,10 @@ exports.getProfile = async(req,res) => {
       
         let isOwnerProfile = false;
          let userData = await User.findOne({
-            where:{id},include:{model:comment,attributes:['content', 'createdAt'],include:{model:episode,attributes:['id', 'numberEpisode'],include:{model:session,attributes:['sessionName']}}}})
+            where:{id},include:{model:comment,attributes:['content', 'createdAt']
+                ,include:{model:episode,attributes:['id', 'numberEpisode']
+                    ,include:{model:session,attributes:['sessionName']}}}
+                    , order: [[{ model: comment }, 'createdAt', 'DESC']]})
         if (req.user)
         {
             isUser = true;
@@ -47,18 +50,19 @@ exports.getProfile = async(req,res) => {
 
 exports.updateUserData = async(req,res) => {
     try{
-        const{username,email,password} = req.body;
-   
-        let fileName = 'default';
+        let{username,email,password} = req.body;
+          const {id} = req.params;
+            let fileName;
+            let user = await User.findOne({where:{id}});
+          fileName = user.image;
+       
          if (req.file) {
             fileName = req.file.filename;
-            console.log(fileName)
         }
         
-        const {id} = req.params;
+       
         let isOwnerProfile = false;
         let isUser = false;
-         let user = await User.findOne({where:{id}});
          
          // فحص البريد الإلكتروني فقط إذا كان مختلف عن البريد الحالي
          if (email && email !== user.email) {
@@ -81,36 +85,29 @@ exports.updateUserData = async(req,res) => {
         {
          return res.status(400).json({msg:"هذا المستخدم غير موجود"})
         };
-        if (isOwnerProfile)
-        {
         let hashPassword;
-                if (!username){
-                username = user.username;
-                }
-                if (!password){
-                password = user.password;
-                }
-                else {
-                    hashPassword = bcrypt.hash(password,10);
-                }
-                if (!email)
-                {
-                    email = user.email
-                }
-
-        let afterUpdate = await user.update({username,email,password:hashPassword,image:fileName});
-        
-          return res.status(201).json({ isUser, isOwnerProfile ,userData:afterUpdate});
+        if (!username){
+            username = user.username;
+        }
+        if (!password){
+            password = user.password;
         }
         else {
-            
-    const filePath = path.join(__dirname, "..", "uploads", fileName);
-            fs.unlink(filePath,() => {
-                return res.status(401).json({msg :"لأ يمكنك تعديل في مستخدم اخر"})
-            })
-           
-
+            hashPassword = await bcrypt.hash(password,10);
         }
+        if (!email)
+        {
+            email = user.email
+        }
+
+     
+        if (hashPassword) {
+            password = hashPassword;
+        }
+   
+        let afterUpdate = await user.update({email,password,username,image:fileName});
+        console.log("afterupdate",afterUpdate.dataValues)
+        return res.status(201).json({ isUser, isOwnerProfile, userData: afterUpdate});
       
     }catch(err)
     {

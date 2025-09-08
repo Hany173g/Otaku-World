@@ -17,8 +17,6 @@ route.get('/search',isAuth,homeContoller.searchAnime)
 
 
 
-
-
-
+route.get('/search/:animeName',isAuth,homeContoller.searchAnime)
 
 module.exports = route;

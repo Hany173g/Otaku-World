@@ -11,113 +11,52 @@ const { Op, fn, col, where, literal } = require('sequelize');
 
 
 
+
+
+
+exports.searchAnime = async(req,res) => {
+    try{
+        let isUser = null;
+        let {animeName} = req.params;
+        if (req.user)
+        {
+            isUser = req.user;
+        }
+        let anime = await session.findOne({where:{sessionName:animeName}});
+        if (!anime)
+        {
+            return res.status(400).json({msg:"لأ توجد نتائج لهذا البحث"})
+        }
+        res.status(200).json({animeData:anime})
+
+    }catch(err) {
+         res.status(400).json({msg:`حدث مشكله ${err.message}`})
+    }
+}
+
+
+
+
+
+
+
+
+
+
 exports.getHome = async(req,res) => {
     try {  
         let isUser = null;
-        let id = null;
         if (req.user)
         {
-            id = req.user.id
             isUser = req.user;
         } 
         
-        let user = await User.findOne({where:{id}})
-          let filterCategory=[];
-        if (user)
-            {
-
-                let sortCategory = await Algorithm.findOne({where:{userId:req.user.id}})
-                let categories = sortCategory.get({plain:true});
-              
-                Object.keys(categories).forEach(key => {
-                 
-                    if (categories[key] > 0)
-                    {
-                        filterCategory.push(key);
-                    }
-                })
-            }
-           let filterSize = filterCategory.length;
-           let bestCategories = filterCategory.slice(2,filterSize-2)
-           const bestAnimes = await session.findAll({raw:true});
-              let y = 0;   
-            const animesData = [];
-            for (let i = 0; i < Object.keys(bestAnimes).length;i++)
-            {     
-                    bestCategories.forEach(Element => {
-                        for (let x = 0; x < Object.keys(bestAnimes).length;x++)
-                        {
-                            if (Element == bestAnimes[i].categories[x])
-                                {
-                                    y++
-                                } 
-                        }
-                    })
-                if (y > 1)
-                {
-                    animesData.push(bestAnimes[i]);
-                  
-                }
-                if (animesData.length == 10)
-                {
-                    break;
-                }
-                y = 0;
-            }
+        let animesData = await session.findAll({raw:true});
         console.log(animesData)
         res.status(200).json({isUser,animesData})
     }catch(err)
     {
         res.status(400).json({msg:`حدث مشكله ${err.message}`})}
-}
-
-// دالة البحث
-exports.searchAnime = async(req,res) => {
-    try {
-        const { q } = req.query;
-        
-        if (!q || q.trim().length < 2) {
-            return res.status(400).json({msg: "يرجى إدخال كلمة بحث من حرفين على الأقل"});
-        }
-
-        const { Op } = require('sequelize');
-        const { session } = require('../models/relations');
-
-        // البحث في اسم الأنمي والوصف والتصنيفات
-        const searchResults = await session.findAll({
-            where: {
-                [Op.or]: [
-                    {
-                        sessionName: {
-                            [Op.like]: `%${q}%`
-                        }
-                    },
-                    {
-                        description: {
-                            [Op.like]: `%${q}%`
-                        }
-                    },
-                    {
-                        categories: {
-                            [Op.contains]: [q]
-                        }
-                    }
-                ]
-            },
-            limit: 20,
-            order: [['sessionName', 'ASC']]
-        });
-
-        res.status(200).json({
-            results: searchResults,
-            query: q,
-            count: searchResults.length
-        });
-
-    } catch (err) {
-        console.error("Search error:", err);
-        res.status(400).json({msg: `حدث خطأ في البحث: ${err.message}`});
-    }
 }
 
 
