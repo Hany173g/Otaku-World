@@ -27,3 +27,15 @@ exports.getSession = async(req,res) => {
         res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message})
     }
 }
+
+
+
+
+exports.addLike = async(req,res) => {
+    try{
+        
+    }catch(err)
+    {
+        res.status(400).json({msg:"حدث خطاء ما حاول مره اخر",error:err.message}) 
+    }
+}

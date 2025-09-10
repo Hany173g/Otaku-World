@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Links Test</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
+  h1 { text-align: center; }
+  #results { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; justify-content: center; }
+  .anime-card { background: #fff; padding: 15px; border-radius: 10px; width: 250px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); text-align: center; }
+  .anime-card img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+  .anime-card h3 { margin-top: 0; font-size: 18px; }
+  .episodes { margin-top: 10px; text-align: right; }
+  .episode-item { margin-bottom: 5px; }
+  .episode-item a { margin-left: 5px; text-decoration: none; color: blue; }
+  input, button { padding: 8px; font-size: 14px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>أفضل 10 أنميات</h1>
+<div style="text-align:center;">
+  <input type="text" id="animeName" placeholder="اكتب اسم الأنمي">
+  <button id="searchBtn">بحث</button>
+</div>
+
+<div id="results"></div>
+
+<script>
+const resultsDiv = document.getElementById("results");
+
+// تحميل الأنميات الشائعة
+async function loadPopular() {
+  resultsDiv.innerHTML = "جارٍ تحميل الأنميات...";
+  try {
+    const res = await fetch("http://localhost:3000/api/popular");
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) return resultsDiv.innerHTML = "لا توجد أنميات";
+
+    resultsDiv.innerHTML = "";
+    data.forEach(anime => {
+      createAnimeCard(anime);
+    });
+  } catch (err) {
+    console.error(err);
+    resultsDiv.innerHTML = "حدث خطأ أثناء تحميل الأنميات";
+  }
+}
+
+// البحث عند الحاجة
+document.getElementById("searchBtn").addEventListener("click", async () => {
+  const query = document.getElementById("animeName").value;
+  if (!query) return alert("اكتب اسم الأنمي!");
+
+  resultsDiv.innerHTML = "جارٍ البحث...";
+  try {
+    const res = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) return resultsDiv.innerHTML = "لا توجد نتائج";
+
+    resultsDiv.innerHTML = "";
+    data.forEach(anime => {
+      createAnimeCard(anime);
+    });
+  } catch (err) {
+    console.error(err);
+    resultsDiv.innerHTML = "حدث خطأ أثناء البحث";
+  }
+});
+
+// إنشاء بطاقة أنمي
+function createAnimeCard(anime) {
+  const card = document.createElement("div");
+  card.className = "anime-card";
+  card.innerHTML = `
+    <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+    <h3>${anime.title}</h3>
+    <button onclick="getEpisodes(${anime.mal_id}, this)">عرض الحلقات</button>
+    <div class="episodes"></div>
+  `;
+  resultsDiv.appendChild(card);
+}
+
+// جلب الحلقات
+async function getEpisodes(animeId, btn) {
+  const card = btn.parentElement;
+  const epsDiv = card.querySelector(".episodes");
+  epsDiv.innerHTML = "جارٍ جلب الحلقات...";
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/episodes/${animeId}`);
+    const eps = await res.json();
+
+    if (!Array.isArray(eps) || eps.length === 0) {
+      epsDiv.innerHTML = "لا توجد حلقات لهذا الأنمي";
+      return;
+    }
+
+    epsDiv.innerHTML = "<ul>" + eps.map(ep => `
+      <li class="episode-item">
+        حلقة ${ep.mal_id || ep.episode_id || "؟"}: ${ep.title || "بدون عنوان"}
+      </li>
+    `).join("") + "</ul>";
+
+  } catch (err) {
+    console.error(err);
+    epsDiv.innerHTML = "حدث خطأ أثناء جلب الحلقات";
+  }
+}
+
+// تحميل الأنميات تلقائيًا عند فتح الصفحة
+window.onload = loadPopular;
+</script>
+</body>
+</html>

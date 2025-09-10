@@ -3,9 +3,6 @@
 
 const { episode,User ,Algorithm,session} = require('../models/relations');
 
-const { Op, fn, col, where, literal } = require('sequelize');
-
-
 
 
 
@@ -27,12 +24,14 @@ exports.searchAnime = async(req,res) => {
         {
             return res.status(400).json({msg:"لأ توجد نتائج لهذا البحث"})
         }
-        res.status(200).json({animeData:anime})
+        res.status(200).json({animeData:anime,isUser})
 
     }catch(err) {
          res.status(400).json({msg:`حدث مشكله ${err.message}`})
     }
 }
+
+
 
 
 

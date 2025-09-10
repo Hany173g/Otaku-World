@@ -5,6 +5,9 @@ const {episode} = require('./episode');
 const {server} = require('./servers')
 const {comment} = require('./comment')
 const {complaint} = require('./complaints')
+const {likeAnime} = require('./likesAnime')
+
+
 
 
 // relation user to expired code 
@@ -52,6 +55,13 @@ complaint.belongsTo(episode,{foreignKey:'postId'});
 
 User.hasMany(complaint,{foreignKey:'userId',onDelete:'CASCADE'});
 complaint.belongsTo(User,{foreignKey:'userId'});
+
+
+
+// relation likes to anime
+
+session.hasMany(likeAnime,{foreignKey:'animeId',onDelete:'CASCADE'})
+likeAnime.belongsTo(session,{foreignKey:'animeId'})
 
 
 
