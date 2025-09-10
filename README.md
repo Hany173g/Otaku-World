@@ -23,7 +23,7 @@ Express.js – Web framework for handling routes and middleware
 
 MongoDB – NoSQL database for storing users, anime, and interactions
 
-Passport.js – Authentication system (local & Google OAuth)
+
 
 Mongoose – ORM for MongoDB
 
